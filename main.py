@@ -25,20 +25,24 @@ import csv
 import sys
 import get_data_from_net as g
 
-#读取csv文件
-def read_from_csv(filename):
+#获取当前本地数据，返回data，数据结果形如：['19089', '1234567']
+def read_from_csv_data_all(fileName):
+    data = []
     result_data = []
-    data = read_from_csv_data(filename)
-    # if header:
-    # print(header)
-    # print("==============================")
-    for datarow in data:
-        result_data.append(listToString(datarow))
-    return result_data
+    try:
+        with open(fileName) as f:
+            reader = csv.reader(f)
+            # header = next(reader)
+            data = [row for row in reader]
+    except csv.Error as e:
+        print('Error reading CSV file at line %s:%s',reader.line_num,e)
+        sys.exit(-1)
+    return data
 
-def reader_csv_base(filename,start_num=0,end_num=0):
+#读取csv文件,返回数据结果如：['19089', '53']
+def reader_csv_base_tw(filename,start_num=0,end_num=0):
     result_data = []
-    data = read_from_csv_data(filename)
+    data = read_from_csv_data_all(filename)
     # data = read_from_csv(filename)
 
     count = 0
@@ -62,7 +66,7 @@ def listToString(str_content):
 #获取当前本地数据最新期数数
 def getLatest(fileName):
     result_data = []
-    data = read_from_csv_data(fileName)
+    data = read_from_csv_data_all(fileName)
     count = 1
     for datarow in data:
         if count > 1:
@@ -71,20 +75,6 @@ def getLatest(fileName):
         count+=1
     return round(float(result_data[0]))
 
-#获取当前本地数据，返回data
-def read_from_csv_data(fileName):
-    data = []
-    result_data = []
-    try:
-        with open(fileName) as f:
-            reader = csv.reader(f)
-            # header = next(reader)
-            data = [row for row in reader]
-    except csv.Error as e:
-        print('Error reading CSV file at line %s:%s',reader.line_num,e)
-        sys.exit(-1)
-    return data
-
 #取tw数,end为距今的期数，如：10，则表示最近的10期tw
 def twFromData(str_content,end):
     count = 1
@@ -92,7 +82,8 @@ def twFromData(str_content,end):
     for datarow in str_content:
         if count > end and end > 0:
             break
-        result_data = datarow[5] + datarow[8]
+        # result_data = datarow[5] + datarow[8]
+        result_data = datarow[:]
         tw_result.append(result_data)
         count+=1
     return tw_result
@@ -162,7 +153,7 @@ def contain_english(content):
 def getNumFromTw(tw="00",skip=0):
     count = 0
     tw_result = []
-    str_content = read_from_csv_data(rfilename)
+    str_content = read_from_csv_data_all(rfilename)
     if len(str_content) <= 0:
         return
     for datarow in str_content:
@@ -187,7 +178,7 @@ def getNumFromTw(tw="00",skip=0):
 def max_omission(tw,str_content=[]):
     count = 0
     tw_result = []
-    # str_content = reader_csv_base(rfilename)
+    # str_content = reader_csv_base_tw(rfilename)
     if len(str_content) <= 0:
         return
     tmp_num = ''
@@ -219,7 +210,7 @@ def max_omission(tw,str_content=[]):
 def max_output(tw,str_content=[]):
     count = 0
     tw_result = []
-    # str_content = reader_csv_base(rfilename)
+    # str_content = reader_csv_base_tw(rfilename)
     if len(str_content) <= 0:
         return
     result_num = ''
@@ -262,8 +253,8 @@ def max_output(tw,str_content=[]):
 # result = mycsv.getLatest(rfilename)
 
 #最近N期的tw数
-bt_result = twFromData(read_from_csv(rfilename), qijianshu)
-# print(bt_result)
+bt_result = twFromData(reader_csv_base_tw(rfilename), qijianshu)
+print(bt_result)
 
 #对最近N期tw数进行统计次数，并排序
 # print(tw_sort(tw_count(bt_result)))
@@ -276,16 +267,16 @@ bt_result = twFromData(read_from_csv(rfilename), qijianshu)
 # print(getNumFromTw("53",1))
 
 #最大漏开
-str_content = reader_csv_base(rfilename)
+str_content = reader_csv_base_tw(rfilename)
 # print(max_omission('69',str_content))
 
 #最大连开
-print(max_output('11',str_content))
+# print(max_output('11',str_content))
 #从本地文件中读取期数及其对应tw数
 # print(len(reader_csv_base(rfilename,0,20)))
 
-
 # mycsv.write_to_csv(wfilename,"123")
 # print(content)
-# print(mycsv.read_from_csv("data_csv.csv"))
-# mycsv.twFromData(mycsv.read_from_csv(rfilename))
+
+# read_from_csv_data_all(rfilename)
+# reader_csv_base_tw(rfilename)
