@@ -1,9 +1,10 @@
 
 rfilename = '../data/getresult.csv'
 wfilename = '../data/getresult.csv'
-qijianshu=10
+qijianshu=0
 tw_num = '08'
 
+#形如{'00',0}
 def init_dict():
     tw_dict={}
     for i in range(0,10):
@@ -11,13 +12,15 @@ def init_dict():
             tw_dict[str(i)+str(k)]=0
     return tw_dict
 
+#data_list格式形如：['19089', '53']
 def tw_count(data_list):
     tw_dict = init_dict()
     for tw in data_list:
-        if tw_dict[tw] > 0:
-            tw_dict[tw] += 1
+        print(tw)
+        if tw_dict[tw[1]] > 0:
+            tw_dict[tw[1]] += 1
         else:
-            tw_dict[tw] = 1
+            tw_dict[tw[1]] = 1
     return tw_dict
 
 ##################
@@ -76,7 +79,7 @@ def getLatest(fileName):
     return round(float(result_data[0]))
 
 #取tw数,end为距今的期数，如：10，则表示最近的10期tw
-def twFromData(str_content,end):
+def twFromData(str_content,end=0):
     count = 1
     tw_result = []
     for datarow in str_content:
@@ -87,6 +90,30 @@ def twFromData(str_content,end):
         tw_result.append(result_data)
         count+=1
     return tw_result
+
+#通过tw统计所指定数据中出现的次数
+def twCountFromData(tw,str_content,end=0):
+    print("tw总共出现的次数")
+    count = 0
+    for datarow in str_content:
+        if count > end and end > 0:
+            break
+        if(datarow[1] == tw):
+            count+=1
+    return tw,count
+
+#通过指定多少期(如100期)内，tw统计所指定出现的次数
+def twFromSetCount(tw,str_content,end=0):
+    print("tw在该期间出现的次数")
+    count_result = 0
+    count = 0
+    for datarow in str_content:
+        if count_result > end-1 and end > 0:
+            break
+        if(datarow[1] == tw):
+            count+=1
+        count_result += 1
+    return tw,count
 
 #将字符串写入csv文件
 def write_to_csv(filename,content):
@@ -104,6 +131,7 @@ def write_to_csv(filename,content):
         print('Error Write CSV %s',e)
         sys.exit(-1)
 
+#形如
 def write_csv_from_net(wfilename,start_num,end_num):
     #1.先判断wfilename文件是否存在，若不存在，则新建
     file_status = IsNotExistFile(wfilename)
@@ -112,25 +140,26 @@ def write_csv_from_net(wfilename,start_num,end_num):
         latest_num = getLatest(wfilename)
         #end_num比latest_num大，表示有服务器有新的数据
         if end_num > latest_num and latest_num > 0:
-            start_num = latest_num
+            start_num = latest_num + 1
         else:
+            print("服务器无新数据")
             return
-    for i in range(end_num,start_num,-1):
-        print(start_num)
+    # for i in range(end_num,start_num,-1):
+    for i in range(start_num,end_num+1):
         url = ""
         if i<10000:
             url = '0'+ str(i)
         else:
-            url = str(i)
-        content = g.getUrlResponeContent("http://kaijiang.500.com/shtml/qxc/" + url + ".shtml")
+            url = "20" + str(i)
+        # content = g.getUrlResponeContent("http://kaijiang.500.com/shtml/qxc/" + url + ".shtml")
+        content = g.getUrlResponeContent("https://kjh.55128.cn/qxc-kjjg-" + url + ".htm")
         if content == "continue":
             continue
-        content = url + "," + content
+        content = url[2:] + "," + content
         print(content)
         write_to_csv(wfilename,content)
-# data_analy(filename)
-# twFromData(data)
 ##################
+
 
 #########################
 import os
@@ -150,25 +179,24 @@ def contain_english(content):
     return bool(re.search('[a-zA-Z]', content))
 
 #当期期数开tw，则为0;skip参数为匹配次数,加入传1，则表示匹配一次后，继续往后匹配
-def getNumFromTw(tw="00",skip=0):
+def getNumFromTw(tw="00",skip=1):
+    print("最近开的期数")
     count = 0
     tw_result = []
     str_content = read_from_csv_data_all(rfilename)
     if len(str_content) <= 0:
-        return
+        return "无原始数据"
     for datarow in str_content:
-        # result_data = list(set(datarow[0]).intersection(set(datarow[1])))
-        # result_data_num = str.split(datarow[0],' ')
         result_data_num = datarow[0]
         result_data = datarow[1][0:4:3]
-        if tw == result_data and skip == 0:
-            return result_data_num,count
-        elif skip > 0:
-            count+=1
-            skip -= 1
-            continue
-    #     result = result_data_num + result_data
-    #     tw_result.append(result)
+        if tw == result_data :
+            if skip == 0:
+                return result_data_num,count
+
+            elif skip > 0:
+                count+=1
+                skip -= 1
+                continue
         count+=1
     # return tw_result
 
@@ -176,6 +204,7 @@ def getNumFromTw(tw="00",skip=0):
 ###############################
 #最大漏开
 def max_omission(tw,str_content=[]):
+    print("最大漏开")
     count = 0
     tw_result = []
     # str_content = reader_csv_base_tw(rfilename)
@@ -199,15 +228,11 @@ def max_omission(tw,str_content=[]):
     if len(tmp_num) == 0:
         return  '该tw在指定期间内，尚未开出'
     return tmp_num,tmp_count
-        #     result = result_data_num + result_data
-        #     tw_result.append(result)
-###############################
-###############################
-
 #############################
 #############################
 #最大连开
 def max_output(tw,str_content=[]):
+    print("最大连开")
     count = 0
     tw_result = []
     # str_content = reader_csv_base_tw(rfilename)
@@ -245,6 +270,22 @@ def max_output(tw,str_content=[]):
 ###############################
 ###############################
 
+def cmd_loop(bt_result):
+
+    for tw_num in  bt_result:
+
+        print(tw_num[1])
+        #通过tw，查询最近开的期数
+        print(getNumFromTw(tw_num))
+        # 对最近N期tw数进行统计次数，并排序
+        print(tw_sort(tw_count(bt_result)))
+        #最大漏开
+        print(max_omission(tw_num,bt_result))
+        #最大连开
+        print(max_output(tw_num,bt_result))
+
+####################################
+####################################
 #1.先获取本地最新期数，然后判断是否继续向服务器请求新的数据
 #2.如果有新的数据，则在第一行插入新数据
 # mycsv.write_csv_from_net(wfilename,4100,19090)
@@ -253,9 +294,9 @@ def max_output(tw,str_content=[]):
 # result = mycsv.getLatest(rfilename)
 
 #最近N期的tw数
-bt_result = twFromData(reader_csv_base_tw(rfilename), qijianshu)
-print(bt_result)
-
+# bt_result = twFromData(reader_csv_base_tw(rfilename), qijianshu)
+# print(bt_result)
+# cmd_loop(bt_result)
 #对最近N期tw数进行统计次数，并排序
 # print(tw_sort(tw_count(bt_result)))
 
@@ -267,16 +308,38 @@ print(bt_result)
 # print(getNumFromTw("53",1))
 
 #最大漏开
-str_content = reader_csv_base_tw(rfilename)
-# print(max_omission('69',str_content))
+# bt_result = reader_csv_base_tw(rfilename)
+# print(max_omission('69',bt_result))
 
 #最大连开
-# print(max_output('11',str_content))
+# print(max_output('11',bt_result))
+
 #从本地文件中读取期数及其对应tw数
 # print(len(reader_csv_base(rfilename,0,20)))
 
-# mycsv.write_to_csv(wfilename,"123")
-# print(content)
-
 # read_from_csv_data_all(rfilename)
 # reader_csv_base_tw(rfilename)
+
+#从服务器获取新数据，并在本地数据集前面追加新数据
+write_csv_from_net(rfilename,0,19095)
+#############################
+#######开奖数据回核###########
+#############################
+bt_result = twFromData(reader_csv_base_tw(rfilename))
+tw_num = '79'
+# print(tw_num)
+#通过tw，查询最近开的期数
+print(getNumFromTw(tw_num))
+# 对最近N期tw数进行统计次数，并排序
+# print(tw_sort(tw_count(bt_result)))
+#最大漏开
+print(max_omission(tw_num,bt_result))
+
+#最大连开
+print(max_output(tw_num,bt_result))
+
+#指定tw，查看指定期间数据中，tw总共出现的次数
+print(twCountFromData(tw_num,bt_result))
+
+##通过指定多少期(如100期)内，tw统计所指定出现的次数
+print(twFromSetCount(tw_num,bt_result,10))
