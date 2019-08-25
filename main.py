@@ -1,7 +1,7 @@
 
 rfilename = '../data/getresult.csv'
 wfilename = '../data/getresult.csv'
-qijianshu=97
+qijianshu=98
 
 #形如{'00',0}
 def init_dict():
@@ -343,7 +343,7 @@ def cmd_loop(bt_result):
 ############################################
 ############################################
 #从服务器获取新数据，并在本地数据集前面追加新数据
-write_csv_from_net(rfilename,0,19099)
+write_csv_from_net(rfilename,0,19100)
 
 
 #############################
