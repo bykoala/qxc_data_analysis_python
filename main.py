@@ -1,7 +1,7 @@
 
 rfilename = '../data/getresult.csv'
 wfilename = '../data/getresult.csv'
-qijianshu=98
+qijianshu=100
 
 #形如{'00',0}
 def init_dict():
@@ -343,17 +343,17 @@ def cmd_loop(bt_result):
 ############################################
 ############################################
 #从服务器获取新数据，并在本地数据集前面追加新数据
-write_csv_from_net(rfilename,0,19100)
+# write_csv_from_net(rfilename,0,19101)
 
 
 #############################
 #######开奖数据回核###########
 #############################
 bt_result = twFromData(reader_csv_base_tw(rfilename))
-tw_num = '63'
+tw_num = '46'
 # print(tw_num)
 #通过tw，查询最近开的期数
-print(getNumFromTw(tw_num,1))
+print(getNumFromTw(tw_num,0))
 # 对最近N期tw数进行统计次数，并排序
 print(tw_sort(tw_count(bt_result)))
 #最大漏开

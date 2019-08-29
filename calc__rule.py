@@ -52,13 +52,13 @@ def calc_result(gl_or_zs,hs,ts,ws):
                     hs_result.append(i)
         if ws != 0:
             for w in ws:
-                if w == i[0]:
+                if w == i[1]:
                     ws_result.append(i)
 #只有合数hs
     if ts == 0 and ws == 0 and hs != 0:
         print("组数:" + str(len(hs_result)))
         return hs_result
-#只有头尾tw
+#只有头ts
     if ts !=0 and hs == 0 and ws == 0:
         print("组数:" + str(len(ts_result)))
         return ts_result
@@ -93,10 +93,11 @@ def calc_result(gl_or_zs,hs,ts,ws):
 
 #有头数和尾数，没有合数
     if ts != 0 and ws !=0:
-        for w in ws_result:
+        print(ws_result)
+        for ws in ws_result:
             for t in ts:
-                if int(t) == int(w[0]):
-                    ts_ws_result.append(w)
+                if int(t) == int(ws[0]):
+                    ts_ws_result.append(ws)
         if hs == 0:
             print("组数:" + str(len(ts_ws_result)))
             return ts_ws_result
