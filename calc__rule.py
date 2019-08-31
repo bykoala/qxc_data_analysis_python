@@ -93,7 +93,6 @@ def calc_result(gl_or_zs,hs,ts,ws):
 
 #有头数和尾数，没有合数
     if ts != 0 and ws !=0:
-        print(ws_result)
         for ws in ws_result:
             for t in ts:
                 if int(t) == int(ws[0]):
@@ -126,6 +125,12 @@ def showResultToString(list):
         count += 1
     print(str_result)
 
+#####################通过tw查询指定期间内的概率情################################
+################################################################################
+
+
+
+
 #calc_result函数调用说明:第一个参数0表示gl，否则传zs。第二个为合数hs，第三个为头尾tw，第四个为尾数ws,某个数若无值，则传0
 # print(calc_result(gl,hs,tw,ws))
-showResultToString(calc_result(gl,hs,ts,ws))
+showResultToString(calc_result(gl,0,ts,ws))

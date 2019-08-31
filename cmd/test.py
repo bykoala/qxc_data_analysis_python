@@ -1,14 +1,11 @@
-def test(a,b,c):
-    if a != 0:
-        print("a")
-    if b != 0:
-        print("b")
-    if c != 0:
-        print("c")
-    if a != 0 and b != 0:
-        print("ab")
-        if c == 0:
-            return "abc"
+def test(a):
+    a = 'b'
+    print("test" + a)
 
+def returnStr():
+    return "r"
 
-print(test(1,2,0))
+result = returnStr()
+test(result)
+
+print(result)
